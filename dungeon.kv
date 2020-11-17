@@ -1,0 +1,416 @@
+#kivy
+#:import FadeTransition kivy.uix.screenmanager.FadeTransition
+#:import SlideTransition kivy.uix.screenmanager.SlideTransition
+
+<Manager>:
+    transition: FadeTransition()
+    Inicio:
+        name:'inicio'
+    Regras:
+        name:'regras'
+    Escolha:
+        name:'escolha'
+    Porta:
+        name:'porta'
+    Jogo:
+        name:'jogo'
+    Fim_de_jogo:        
+        name:'vitoria'
+    Morte:
+        name:'derrota'
+
+#{“x”:1, “y”:1, “left”:1, “right”:1, "center_x":1, "center_y":1, "top”:1, “bottom”:1}
+
+<Inicio>:
+    canvas:
+        Rectangle:
+            size:self.size
+            pos:self.pos
+            source:'cartas/logo.png'
+    Button:
+        text:'Jogar'
+        size_hint:.25, .10
+        border:(0, 0, 0, 0)
+        pos_hint:{"center_x":0.5, "center_y":0.1}
+        background_normal:'cartas/botao1.png'
+        background_down:'cartas/botao1.png'
+        on_press: app.root.current = 'escolha'
+    Button:
+        text:'Regras'
+        size_hint:.15, .10
+        border:(0, 0, 0, 0)
+        pos_hint:{"center_x":0.9, "center_y":0.1}
+        background_normal:'cartas/botao1.png'
+        background_down:'cartas/botao1.png'
+        on_press: app.root.current = 'regras'
+
+[Pagina_reg@Screen]:
+    name:ctx.name
+    GridLayout:
+        cols:4
+        border:0
+        swipe_threshold:0
+        canvas:
+            Color:
+                rgba: 0, 0, 0, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        BoxLayout:
+            orientation:'vertical'
+            size_hint:0.2,1
+            Button:
+                text:'voltar'
+                size_hint:1,0.1
+                on_press: app.root.current = 'inicio'
+            Button:
+                text:'<'
+                on_press:
+                    root.manager.transition = SlideTransition(direction="right")
+                    root.manager.current=ctx.pg1
+        Image:
+            source:'cartas/regras/%s.png' % ctx.image1
+        Image:
+            source:'cartas/regras/%s.png' % ctx.image2
+        Button:
+            text:'>'
+            size_hint:0.2,0.1
+            on_press:
+                root.manager.transition = SlideTransition(direction="left")
+                root.manager.current=ctx.pg2
+
+<Sm@ScreenManager>:
+    transition: SlideTransition()
+    Pagina_reg:
+        name:'reg1'
+        image1:'1'
+        image2:'2'
+        pg1:'reg1'
+        pg2:'reg2'
+    Pagina_reg:
+        name:'reg2'
+        image1:'3'
+        image2:'4'
+        pg1:'reg1'
+        pg2:'reg3'
+    Pagina_reg:
+        name:'reg3'
+        image1:'5'
+        image2:'6'
+        pg1:'reg2'
+        pg2:'reg4'
+    Pagina_reg:
+        name:'reg4'
+        image1:'7'
+        image2:'8'
+        pg1:'reg3'
+        pg2:'reg4'
+
+<Regras@Screen>:
+    Sm:
+
+<Botao_num@Button>:
+    font_size:0.2*(self.width+self.height)
+    color:0,0,0,1
+    size_hint:0.5,1
+    border:0, 0, 0, 0
+    background_normal:'cartas/personagens/numero.png'
+    background_down:'cartas/personagens/numeroselec.png'
+
+<But_menu@RelativeLayout>:
+    Button:
+        pos_hint: {'left': 1, 'top': 1}
+        text:'inicio'
+        border:(0, 0, 0, 0)
+        size_hint:0.1,0.07
+        background_normal:'cartas/botao1.png'
+        background_down:'cartas/botao1.png'
+        on_press:app.root.current = 'inicio'
+
+<Escolha>:
+    canvas:
+        Rectangle:
+            size:self.size
+            pos:self.pos
+            source:'cartas/fundo.jpg'
+    But_menu:
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing:30
+        
+        Image:
+            source:'cartas/escolha.png'
+            size_hint_y: 0.3
+            Label:
+                text:'ESCOLHE TEU PERSONAGEM'
+                color:0,0,0,1
+                font_size:.015*(self.parent.width+self.parent.height)
+                #size_hint_y: 0.2
+                pos: self.parent.pos
+                size: self.parent.size
+
+        BoxLayout:
+            padding:10
+            spacing:10
+            Button:       
+                id:mago    
+                border:(0, 0, 0, 0) 
+                background_normal:'cartas/personagens/mago.png'
+                background_down:'cartas/personagens/magoselec.png'
+                on_press: root.troca('mago')
+            Button:      
+                id:exploradora      
+                border:(0, 0, 0, 0)
+                background_normal:'cartas/personagens/exploradora.png'
+                background_down:'cartas/personagens/exploradoraselec.png'
+                on_press: root.troca('exploradora')
+            Button:  
+                id:guerreiro    
+                border:(0, 0, 0, 0)      
+                background_normal:'cartas/personagens/guerreiro.png'
+                background_down:'cartas/personagens/guerreiroselec.png'
+                on_press: root.troca('guerreiro')
+            Button: 
+                id:ladra    
+                border:(0, 0, 0, 0)       
+                background_normal:'cartas/personagens/ladra.png'
+                background_down:'cartas/personagens/ladraselec.png'
+                on_press: root.troca('ladra')
+            Button:   
+                id:cavaleiro    
+                border:(0, 0, 0, 0)     
+                background_normal:'cartas/personagens/cavaleiro.png'
+                background_down:'cartas/personagens/cavaleiroselec.png'
+                on_press: root.troca('cavaleiro')
+            Button:
+                id:aleatorio
+                border:(0, 0, 0, 0)
+                background_normal:'cartas/personagens/aleatorio.png'
+                background_down:'cartas/personagens/aleatorioselec.png'
+                on_press: root.troca('aleatorio')
+        BoxLayout:
+            size_hint_y: 0.3
+            #spacing:root.width/3
+            padding:20
+            BoxLayout:
+                #size_hint_x:0.5
+                orientation: 'vertical'
+                padding:root.width/16, 0, root.width/3, 0   
+                Label:
+                    text:'QUANTOS JOGADORES TERÁ A PARTIDA?'
+                    font_size:.03*(self.width+self.height)
+                BoxLayout:
+                    spacing:root.width/15                          
+                    Botao_num:
+                        id:2
+                        text:'2'
+                        on_press: root.trocabt(2)
+                    Botao_num:
+                        id:3
+                        text:'3'
+                        on_press: root.trocabt(3)
+                    Botao_num:
+                        id:4
+                        text:'4'
+                        on_press: root.trocabt(4)
+                    Botao_num:
+                        id:5
+                        text:'5'
+                        on_press: root.trocabt(5)
+            Button:
+                size_hint:0.25,0.5
+                text:'Seguir' 
+                font_size:0.1*(self.width+self.height)
+                background_normal:'cartas/botao1.png'
+                background_down:'cartas/botao1.png'
+                on_press: root.seguir()
+
+<Porta>:
+    BoxLayout:
+        orientation: 'vertical' 
+        padding:0,0,root.height/10,root.height/10
+        Label:
+            id:porta_text
+            size_hint:1, 0.2
+            font_size:.015*(self.parent.width+self.parent.height)
+            pos_hint:{"center_x":0.5, "center_y":0.9}
+        Image:
+            source:'cartas/salas/porta1.png'
+
+<Jogo>:
+    canvas:
+        Rectangle:
+            size:self.size
+            pos:self.pos
+            source:'cartas/fundo.jpg'
+    But_menu:
+
+    #conteudo da sala
+    Image:
+        id:mons 
+        size_hint:0.5, 0.5
+        pos_hint:{"center_x":0.5, "center_y":0.6}
+        source:
+    
+    #mapa da sala
+    RelativeLayout:
+        BoxLayout:
+            size_hint:0.25,0.14
+            pos_hint: {'right': 1, 'top': 1}
+            pos:self.pos
+            Image:
+                id:m1
+            Image:
+                id:m2
+            Image:
+                id:m3
+            Image:
+                id:m4
+            Image:
+                id:m5
+
+       
+    BoxLayout:
+        id:boxx
+        size_hint_y:0.3
+        orientation: 'vertical'        
+
+        #botao seguir
+        BoxLayout:
+            size_hint_y:0.3
+            padding:0.001*(self.width+self.height)
+            Widget:
+                size_hint_x:0.8
+            Button:
+                id:bt_seguir
+                size_hint:0.2, 1
+                text:'Seguir' 
+                font_size:0.05*(self.width+self.height)
+                background_normal:'cartas/botao1.png'
+                background_down:'cartas/botao1.png'
+
+        #cartas do jogador   
+        StackLayout:                
+            id:cartas
+            padding:[self.width/5,0,0,0]
+            orientation:'lr-tb'
+
+    #caso nenhuma carta seja escolhida
+    Label:
+        id:mensagem        
+        opacity:0
+        font_size:0.02*(self.width+self.height)
+        pos_hint:{"center_x":0.5, "center_y":0.7}
+
+    #cartoes dos personagens
+    StackLayout: 
+        id:per_card
+        orientation:'tb-lr'
+        padding:[0,self.height/10*1.5,0,0]
+    StackLayout: 
+        id:per_coracao
+        orientation:'tb-lr'
+        padding:[self.width/14.5, self.height/10*1.9, 0, 0]
+        spacing:self.height/11.5
+    StackLayout: 
+        id:per_saco
+        orientation:'tb-lr'
+        padding:[self.width/9.8, self.height/10*1.9, 0, 0]
+        spacing:self.height/11.5
+    StackLayout: 
+        id:per_carta
+        opacity:0
+        orientation:'tb-lr'
+        padding:[self.width/9.8, self.height/10*1.5, 0, 0]
+
+<But_cart>:
+    size_hint: 0.1, 1
+    on_press:self.parent.parent.parent.cart_selec(self.id)
+    border:(0, 0, 0, 0)
+
+<But_kokoro>:
+    background_normal:'cartas/personagens/coracao.png'
+    background_down:'cartas/personagens/coracao.png'
+    size_hint:[0.035,0.09]
+    border:(0, 0, 0, 0)
+    font_size:0.2*(self.width+self.height)
+
+<But_saco>:
+    background_normal:'cartas/personagens/saco.png'
+    background_down:'cartas/personagens/saco.png'
+    size_hint:[0.035,0.09]
+    border:(0, 0, 0, 0)
+    font_size:0.2*(self.width+self.height)
+
+<Per_carta>:
+    size_hint:[0.035,0.15]
+
+
+<Morte@Screen>:
+    canvas:
+        Rectangle:
+            size:self.size
+            pos:self.pos
+            source:'cartas/fundo.jpg'
+    BoxLayout:
+        orientation:'vertical'
+        size_hint:0.7,0.7
+        pos_hint:{"center_x":0.5, "center_y":0.5}
+        Label:
+            text:'MORRESTE'
+            font_size:0.09*(self.width+self.height)
+        BoxLayout:
+            size_hint_y:0.3
+            Button:
+                text:'Jogar novamente'
+                font_size:0.04*(self.width+self.height)
+                border:(0, 0, 0, 0)
+                background_normal:'cartas/botao1.png'
+                background_down:'cartas/botao1.png'
+                on_press:app.root.current='escolha'
+            Button:
+                text:'sair'
+                font_size:0.04*(self.width+self.height)
+                border:(0, 0, 0, 0)
+                background_normal:'cartas/botao1.png'
+                background_down:'cartas/botao1.png'
+                on_press:app.stop()
+
+<Fim_de_jogo>:
+    canvas:
+        Rectangle:
+            size:self.size
+            pos:self.pos
+            source:'cartas/fundo.jpg'
+    BoxLayout:
+        orientation:'vertical'
+        size_hint:0.7,0.7
+        pos_hint:{"center_x":0.5, "center_y":0.5}
+        Label:
+            text:'FIM DE JOGO'
+            font_size:0.09*(self.width+self.height)
+        Label:
+            id:ganha
+            text:
+            font_size:0.04*(self.width+self.height)
+        Label:
+            id:morre
+            text:
+            font_size:0.04*(self.width+self.height)
+        BoxLayout:
+            size_hint_y:0.3
+            Button:
+                text:'Jogar novamente'
+                font_size:0.04*(self.width+self.height)
+                border:(0, 0, 0, 0)
+                background_normal:'cartas/botao1.png'
+                background_down:'cartas/botao1.png'
+                on_press:app.root.current='escolha'
+            Button:
+                text:'sair'
+                font_size:0.04*(self.width+self.height)
+                border:(0, 0, 0, 0)
+                background_normal:'cartas/botao1.png'
+                background_down:'cartas/botao1.png'
+                on_press:app.stop()
