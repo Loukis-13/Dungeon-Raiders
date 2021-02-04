@@ -1,6 +1,8 @@
-#kivy
 #:import FadeTransition kivy.uix.screenmanager.FadeTransition
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
+
+<Widget>:
+    font_name:'Pirata_One/PirataOne-Regular'
 
 <Manager>:
     transition: FadeTransition()
@@ -303,6 +305,23 @@
         font_size:0.02*(self.width+self.height)
         pos_hint:{"center_x":0.5, "center_y":0.7}
 
+    #resultado da luta contra um monstro
+    Label:
+        id:mensagem_monstro
+        opacity:0
+        font_size:0.02*(self.width+self.height)
+        pos_hint:{"center_x":0.5, "center_y":0.9}
+    StackLayout: 
+        id:mensagem_monstro_dano
+        opacity:0
+        orientation:'tb-lr'
+        padding:[self.width/6.5, self.height/10*1.5, 0, 0]
+    StackLayout: 
+        id:mensagem_chefe_dano
+        opacity:0
+        orientation:'tb-lr'
+        padding:[self.width/5, self.height/10*1.5, 0, 0]
+
     #cartoes dos personagens
     StackLayout: 
         id:per_card
@@ -323,6 +342,11 @@
         opacity:0
         orientation:'tb-lr'
         padding:[self.width/9.8, self.height/10*1.5, 0, 0]
+    StackLayout: 
+        id:per_carta2
+        opacity:0
+        orientation:'tb-lr'
+        padding:[self.width/6.5, self.height/10*1.5, 0, 0]
 
 <But_cart>:
     size_hint: 0.1, 1
@@ -342,6 +366,10 @@
     size_hint:[0.035,0.09]
     border:(0, 0, 0, 0)
     font_size:0.2*(self.width+self.height)
+
+<Per_stats>:
+    font_size:0.15*(self.width+self.height)
+    size_hint:[0.15,0.15]
 
 <Per_carta>:
     size_hint:[0.035,0.15]
@@ -414,3 +442,17 @@
                 background_normal:'cartas/botao1.png'
                 background_down:'cartas/botao1.png'
                 on_press:app.stop()
+    StackLayout: 
+        id:per_card_fim
+        orientation:'tb-lr'
+        padding:[0,self.height/10*1.5,0,0]
+    StackLayout: 
+        id:per_coracao_fim
+        orientation:'tb-lr'
+        padding:[self.width/14.5, self.height/10*1.9, 0, 0]
+        spacing:self.height/11.5
+    StackLayout: 
+        id:per_saco_fim
+        orientation:'tb-lr'
+        padding:[self.width/9.8, self.height/10*1.9, 0, 0]
+        spacing:self.height/11.5

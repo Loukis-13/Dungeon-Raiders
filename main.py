@@ -2,19 +2,16 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.boxlayout import BoxLayout
-from kivy.clock import Clock
 from kivy.uix.image import Image
 from kivy.uix.button import Button
-from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.label import Label
-from kivy.uix.popup import Popup
 from kivy.animation import Animation
 
-#from kivy.config import Config
-#Config.set('graphics', 'resizable', '1')
-#Config.set('graphics', 'width', '1920')
-#Config.set('graphics', 'height', '1080')
-#Config.write()
+# from kivy.config import Config
+# Config.set('graphics', 'resizable', '1')
+# Config.set('graphics', 'width', '1920')
+# Config.set('graphics', 'height', '1080')
+# Config.write()
 
 import time
 from dungeon_raiders import *
@@ -27,33 +24,32 @@ class Inicio(Screen):
 
 num_masm, controle= 1, 0
 class Escolha(Screen):
+    escolha=''
+    qjog=0
     def on_pre_enter(self):
-        global jogs, qjog, num_masm, controle
-        jogs[0], qjog, num_masm, controle = '', 0, 1, 0
+        global qjog, num_masm, controle
+        self.escolha, self.qjog, num_masm, controle = '', 0, 1, 0
         for i in ['mago','ladra','cavaleiro','guerreiro','exploradora','aleatorio']:
             self.ids[i].background_normal=f'cartas/personagens/{i}.png'
         for i in [2,3,4,5]:
             self.ids[str(i)].background_normal='cartas/personagens/numero.png'
 
     def troca(self,p):
-        global jogs
-        jogs[0]=p
+        self.escolha=p
         for i in ['mago','ladra','cavaleiro','guerreiro','exploradora','aleatorio']:
             if i==p: self.ids[i].background_normal=f'cartas/personagens/{i}selec.png'
             else: self.ids[i].background_normal=f'cartas/personagens/{i}.png'
 
     def trocabt(self,b):
-        global qjog
-        qjog=b
+        self.qjog=b
         for i in [2,3,4,5]:
             if i==b: self.ids[str(i)].background_normal='cartas/personagens/numeroselec.png'
             else: self.ids[str(i)].background_normal='cartas/personagens/numero.png'
 
     def seguir(self):
-        global jogs, qjog
-        if qjog and jogs[0]:
-            jogs=players(qjog)
-            gerar_salas(qjog)
+        if self.qjog and self.escolha:
+            players(self.qjog, self.escolha)
+            gerar_salas()
             gerador_masmorras()
             self.manager.current = 'porta'
 
@@ -83,19 +79,24 @@ class But_saco(Button):
     pass
 class Per_carta(Image):
     pass
+class Per_stats(Label):
+    pass
 
 class Jogo(Screen):
     global jogs, masmorras
     m,s=0,0
     ma=['m1','m2','m3','m4','m5']
     esc_cart=''
+    t=0
 
     def on_pre_enter(self, *args):
         global controle
         if controle==0:
-            self.m, self.s = 4, 3
+            self.m, self.s = 0, 0
+            self.esc_cart=''
+            self.t=0
             controle=1
-        
+
         self.ids['bt_seguir'].unbind(on_press=self.boladecristal_pt2)
         self.ids['bt_seguir'].bind(on_press=self.prox)
 
@@ -113,20 +114,27 @@ class Jogo(Screen):
             else:
                 self.ids[ii].source=masmorras[self.m][i].imagem
             
-        
         #cartas do jogador
         self.cartas_jogador()
 
         #irformações dos personagens
         self.jogs_info()
 
+        if len(jogs[0].cartas)==0:
+            self.ids['bt_seguir'].unbind(on_press=self.prox)
+            self.esc_cart='0'
+            self.t=1
+            self.chefe_prox()
+
     #cartas do jogador
     def cartas_jogador(self):
         self.ids['cartas'].clear_widgets()
         for y,i in enumerate(jogs[0].cartas):       
-            if i=='chave' and masmorras[self.m][self.s].tipo!='Tesouro':
+            if i=='chave' and masmorras[self.m][self.s].tipo!='Tesouro' and masmorras[self.m][self.s].tipo!='Chefe':
                 self.ids['cartas'].add_widget(But_cart(id2=i,id=str(y),disabled=True))
-            elif i=='espada' and masmorras[self.m][self.s].tipo!='Monstro' and masmorras[self.m][self.s].tipo!='Chefe':
+            elif i=='espada' and ( (masmorras[self.m][self.s].tipo!='Monstro' and masmorras[self.m][self.s].tipo!='Chefe') or (3 in getattr(masmorras[self.m][self.s], "hab", [])) ):
+                self.ids['cartas'].add_widget(But_cart(id2=i,id=str(y),disabled=True))
+            elif i=='boladecristal' and (7 in getattr(masmorras[self.m][self.s], "hab", [])):
                 self.ids['cartas'].add_widget(But_cart(id2=i,id=str(y),disabled=True))
             else:
                 self.ids['cartas'].add_widget(But_cart(id2=i,id=str(y)))
@@ -146,31 +154,73 @@ class Jogo(Screen):
 
     #mostra qual carta fora selecionada
     def cart_selec(self,x):
-        for i in self.ids['cartas'].children:
-            if i.id==x: 
-                i.background_normal=f'cartas/cartas_de_ataque/{i.id2}selec.png'
-                self.esc_cart=i.id2
-            else:        
-                i.background_normal=f'cartas/cartas_de_ataque/{i.id2}.png'
+        if self.m!=4 or self.s!=4:
+            for i in self.ids['cartas'].children:
+                if i.id==x: 
+                    i.background_normal=f'cartas/cartas_de_ataque/{i.id2}selec.png'
+                    self.esc_cart=i.id2
+                else:        
+                    i.background_normal=f'cartas/cartas_de_ataque/{i.id2}.png'
+        else:
+            self.chefe_selec(x)
 
     #botao seguir
     def prox(self, *args):
-        if self.esc_cart:
-            #tocha
-            if self.esc_cart=='tocha':                
-                for i in masmorras[self.m]:
-                    i.escuro=False
-                jogs[0].cartas.remove(self.esc_cart)
-                self.on_pre_enter()
-                return
-            if self.esc_cart=='boladecristal':
-                self.boladecristal()
-                return
+        if self.m!=4 or self.s!=4:
+            if self.esc_cart:
+                if self.esc_cart=='tocha':                
+                    for i in masmorras[self.m]:
+                        i.escuro=False
+                    jogs[0].cartas.remove(self.esc_cart)
+                    self.on_pre_enter()
+                    return
+                if self.esc_cart=='boladecristal':
+                    self.boladecristal()
+                    return
 
-            self.resolver() 
+                self.ids['bt_seguir'].unbind(on_press=self.prox)
+                self.resolver() 
+            else:
+                self.ids['mensagem'].text='Escolhe uma carta'
+                self.animate_selec(self.ids['mensagem'])
         else:
-            self.ids['mensagem'].text='Escolhe uma carta'
-            self.animate_selec(self.ids['mensagem'])
+            self.chefe_prox()
+
+    def resolver(self):
+        if self.m!=4 or self.s!=4:
+            jogs[0].ultima=self.esc_cart
+            jogs[0].cartas.remove(self.esc_cart)        
+            self.esc_cart=''  
+            
+            tipo=masmorras[self.m][self.s].tipo
+            for i in jogs[1:]:
+                i.jogar(tipo)
+
+            self.ids['per_carta'].clear_widgets()
+            for i in jogs:
+                self.ids['per_carta'].add_widget(Per_carta(source=f'cartas/cartas_de_ataque/{i.ultima}.png'))
+
+            self.animate_per_carta(self.ids['per_carta'])
+
+            x=masmorras[self.m][self.s].resolver()
+            self.ids['mensagem_monstro'].text=x[0]
+
+            self.ids['mensagem_monstro_dano'].clear_widgets()
+            for i in x[1]:
+                if i[0] not in ['espada','chave','tocha','boladecristal']:
+                    self.ids['mensagem_monstro_dano'].add_widget(Per_stats(text=i[0], color=i[1]))
+                else:
+                    self.ids['mensagem_monstro_dano'].add_widget(Per_carta(source=f'cartas/cartas_de_ataque/{i[0]}.png', size_hint=[0.15,0.15]))
+
+            if x[2]:
+                self.animate_monstro_morte(self.ids['mons'])
+
+            self.animate_stats_per(self.ids['mensagem_monstro_dano'])
+            self.animate_result(self.ids['mensagem_monstro']) 
+        else:
+            self.chefe_resolver()
+    animate_stats_per= lambda self, Widget, *args: (Animation(opacity=1) + Animation(duration=3) + Animation(opacity=0)).start(Widget)
+    animate_monstro_morte= lambda self, Widget, *args: (Animation(color=[1,0,0,1]) + Animation(duration=2) + Animation(color=[1,1,1,1])).start(Widget)
     
     animate_bola= lambda self, Widget, *args: Animation(opacity=1, padding=[self.width/6.5, self.height/10*1.5, 0, 0]).start(Widget)
     def boladecristal(self):
@@ -178,8 +228,9 @@ class Jogo(Screen):
         jogs[0].cartas.remove(self.esc_cart)        
         self.esc_cart=''
 
+        tipo=masmorras[self.m][self.s].tipo
         for i in jogs[1:]:
-            i.jogar()
+            i.jogar(tipo)
 
         self.ids['per_carta'].clear_widgets()
         for i in jogs:
@@ -208,29 +259,25 @@ class Jogo(Screen):
                 self.ids['per_carta'].add_widget(Per_carta(source=f'cartas/cartas_de_ataque/{i.ultima}.png'))
             
             self.animate_bola_pt2(self.ids['per_carta'])
-            self.ids['mensagem'].text= masmorras[self.m][self.s].resolver() 
-            self.animate_result(self.ids['mensagem'])  
+
+            x=masmorras[self.m][self.s].resolver()
+            self.ids['mensagem_monstro'].text=x[0]
+
+            self.ids['mensagem_monstro_dano'].clear_widgets()
+            for i in x[1]:
+                if i[0] not in ['espada','chave','tocha','boladecristal']:
+                    self.ids['mensagem_monstro_dano'].add_widget(Per_stats(text=i[0], color=i[1]))
+                else:
+                    self.ids['mensagem_monstro_dano'].add_widget(Per_carta(source=f'cartas/cartas_de_ataque/{i[0]}.png', size_hint=[0.15,0.10]))
+
+            if x[2]:
+                self.animate_monstro_morte(self.ids['mons'])
+
+            self.animate_stats_per(self.ids['mensagem_monstro_dano'])
+            self.animate_result(self.ids['mensagem_monstro']) 
         else:
             self.ids['mensagem'].text='Escolhe uma carta'
-            self.animate_selec(self.ids['mensagem'])
-
-
-    def resolver(self):
-        jogs[0].ultima=self.esc_cart
-        jogs[0].cartas.remove(self.esc_cart)        
-        self.esc_cart=''  
-        
-        for i in jogs[1:]:
-            i.jogar()
-
-        self.ids['per_carta'].clear_widgets()
-        for i in jogs:
-            self.ids['per_carta'].add_widget(Per_carta(source=f'cartas/cartas_de_ataque/{i.ultima}.png'))
-
-        self.animate_per_carta(self.ids['per_carta'])
-
-        self.ids['mensagem'].text= masmorras[self.m][self.s].resolver() 
-        self.animate_result(self.ids['mensagem'])             
+            self.animate_selec(self.ids['mensagem'])         
 
     #caso nenhuma carta seja escolhida
     def animate_selec(self, Widget, *args):         
@@ -254,15 +301,92 @@ class Jogo(Screen):
         result.bind(on_complete=self.sair)
         result.start(Widget)
 
+    def chefe_animate_per_carta(self, Widget, *args):
+        per_carta=Animation(opacity=1, padding=[self.width/4.9, self.height/10*1.5, 0, 0])
+        per_carta+=Animation(duration=3)
+        per_carta+=Animation(opacity=0)
+        per_carta+=Animation(padding=[self.width/6.5, self.height/10*1.5, 0, 0])
+        per_carta.start(Widget)
+
+    def chefe_prox(self):
+        if self.t==0:
+            if self.esc_cart:
+                self.ids['mensagem'].text='Escolhe mais uma ou pressiona seguir'
+                self.animate_selec(self.ids['mensagem'])
+                self.t=1
+            else:
+                self.ids['mensagem'].text='Escolhe uma carta'
+                self.animate_selec(self.ids['mensagem'])
+        else:
+            self.ids['bt_seguir'].unbind(on_press=self.prox)
+            self.chefe_resolver()
+    
+    def chefe_selec(self, x):
+        if self.t==0:
+            for i in self.ids['cartas'].children:
+                if i.id==x: 
+                    i.background_normal=f'cartas/cartas_de_ataque/{i.id2}selec.png'
+                    self.esc_cart=[i.id2, '0']
+                else:        
+                    i.background_normal=f'cartas/cartas_de_ataque/{i.id2}.png'
+        else:
+            for i in self.ids['cartas'].children:
+                if i.id2 == self.esc_cart[0]:
+                    self.esc_cart[1]='0'
+                    continue
+                if i.id==x: 
+                    i.background_normal=f'cartas/cartas_de_ataque/{i.id2}selec.png'
+                    self.esc_cart[1]=i.id2
+                else:        
+                    i.background_normal=f'cartas/cartas_de_ataque/{i.id2}.png'
+
+    def chefe_resolver(self):
+        if self.esc_cart != '0':
+            jogs[0].ultima=self.esc_cart
+            jogs[0].cartas.remove(self.esc_cart[0])
+            if self.esc_cart[1]!='0':
+                jogs[0].cartas.remove(self.esc_cart[1])
+        else:
+            jogs[0].ultima=['0','0']
+        self.esc_cart=['','']
+        
+        for i in jogs[1:]:
+            i.chefe_jogar(masmorras[self.m][self.s].hab)
+
+        self.ids['per_carta'].clear_widgets()
+        self.ids['per_carta2'].clear_widgets()
+        for i in jogs:
+            self.ids['per_carta'].add_widget(Per_carta(source=f'cartas/cartas_de_ataque/{i.ultima[0]}.png'))
+            self.ids['per_carta2'].add_widget(Per_carta(source=f'cartas/cartas_de_ataque/{i.ultima[1]}.png'))
+
+        self.animate_per_carta(self.ids['per_carta'])
+        self.chefe_animate_per_carta(self.ids['per_carta2'])
+
+        x=masmorras[self.m][self.s].resolver()
+        self.ids['mensagem_monstro'].text=x[0]
+
+        self.ids['mensagem_chefe_dano'].clear_widgets()
+        for i in x[1]:
+            self.ids['mensagem_chefe_dano'].add_widget(Per_stats(text=i[0], color=i[1]))
+
+        if x[2]:
+            self.animate_monstro_morte(self.ids['mons'])
+
+        self.animate_stats_per(self.ids['mensagem_chefe_dano'])
+        self.animate_result(self.ids['mensagem_monstro'])
+
+    def chefe_sair(sair):
+        pass
+
     #termina a sala ou masmorra
+    hid=1
     def sair(self, widget, item):        
         if jogs[0].vida==0:
             self.manager.current = 'derrota'
             return
-        for i in jogs:
-            if i.vida==0:
-                i.vivo=False
-                jogs.remove(i)
+
+        jogs[:]=[i for i in jogs if i.vida>0]
+        
         if len(jogs)==1:
             self.manager.current = 'vitoria'
             return
@@ -271,9 +395,16 @@ class Jogo(Screen):
             self.s+=1
             self.on_pre_enter()
         elif self.m==4 and self.s==4:
+            #hidra
+            if masmorras[self.m][self.s].nome=='Hídra' and self.hid:
+                self.on_pre_enter()
+                self.hid=0
+                self.t=0
+                return
+            self.hid=1
+
             self.jogs_info()
 
-            self.m,self.s=0,0
             self.manager.current = 'vitoria'
         else:
             self.jogs_info()
@@ -284,44 +415,61 @@ class Jogo(Screen):
                 i.redefinir()
             self.manager.current = 'porta'
 
+plural=lambda n: 0 if n==1 else 1
+s  = ["","s"]
+es = ["","es"]
+m  = ["","m"]
+ser= ["é","são"]
+
 class Fim_de_jogo(Screen):
+    def jogs_info(self):
+        self.ids['per_card_fim'].clear_widgets()
+        self.ids['per_coracao_fim'].clear_widgets()
+        self.ids['per_saco_fim'].clear_widgets()
+        for i in jogs:
+            self.ids['per_card_fim'].add_widget(Image(source=f'cartas/personagens/{i.nome[:3].lower()}.png',size_hint=[0.15,0.15]))
+            self.ids['per_coracao_fim'].add_widget(But_kokoro(text=str(i.vida)))
+            self.ids['per_saco_fim'].add_widget(But_saco(text=str(i.moedas)))
+        for i in range(5-len(jogs)):
+            self.ids['per_coracao_fim'].add_widget(But_kokoro(background_normal='cartas/personagens/nada.png', background_down='cartas/personagens/nada.png'))
+            self.ids['per_saco_fim'].add_widget(But_saco(background_normal='cartas/personagens/nada.png', background_down='cartas/personagens/nada.png'))
+
     def on_pre_enter(self):
         global jogs
+        global m , es
+        self.ids['morre'].text=''
+        self.ids['ganha'].text=''
+        self.jogs_info()
 
-        for i in jogs:
-            if not i.vivo:
-                jogs.remove(i)
+        jogs[:]=[i for i in jogs if i.vida>0]
         
         if len(jogs)==1:
             self.ids['morre'].text='Todos estão mortos, exceto tu'
             self.ids['ganha'].text='Venceste'
 
-        if len(jogs)>2:
+        elif len(jogs)>2:
             vida=sorted([i.vida for i in jogs])    
             nomes=[]
             if len(set(vida))>1:
                 for i in jogs:
                     if i.vida==vida[0]:
+                        i.vida-=10
                         nomes+=[i.nome]
-                        i.vivo=False
-                self.ids['morre'].text='Jogador '+', '.join(nomes)+' morre'
+                self.ids['morre'].text=f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' morre{m[plural(len(nomes))]}'
 
-                for i in jogs:
-                    if not i.vivo:
-                        jogs.remove(i)
-                moeda=sorted([i.moedas for i in jogs])
+                moeda=sorted([i.moedas for i in jogs if i.vida>0])
                 nomes=[]
                 for i in jogs:
-                    if i.moedas==moeda[-1]:
+                    if i.moedas==moeda[-1] and i.vida>0:
                         nomes+=[i.nome]
-                self.ids['ganha'].text='Jogador '+', '.join(nomes)+' vence a partida'
+                self.ids['ganha'].text=f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' vence{m[plural(len(nomes))]} a partida'
 
             elif len(set(vida))==1 and len(set(moeda))>1:
                 self.ids['morre'].text='Ninguém morre'
                 for i in jogs:
                     if i.moedas==moeda[-1]:
                         nomes+=[i.nome]
-                self.ids['ganha'].text='Jogador '+', '.join(nomes)+' vence a partida'
+                self.ids['ganha'].text=f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' vence{m[plural(len(nomes))]} a partida'
 
             elif len(set(vida))==1 and len(set(moeda))==1:
                 self.ids['ganha'].text='Empate'
