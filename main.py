@@ -6,6 +6,9 @@ from kivy.uix.image import Image
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.animation import Animation
+from kivy.uix.popup import Popup
+from kivy.core.audio import SoundLoader
+from kivy.clock import Clock
 
 # from kivy.config import Config
 # Config.set('graphics', 'resizable', '1')
@@ -14,13 +17,36 @@ from kivy.animation import Animation
 # Config.write()
 
 import time
+from random import choice
+from os import listdir
 from dungeon_raiders import *
+
+for i in listdir("musica"):
+    musica=SoundLoader.load(f'musica/{i}')
+musica.loop=True
+Clock.schedule_interval(lambda x: musica.play() if musica.loop else None, 0)
 
 class Manager(ScreenManager):
     pass
 
+class Regras(Screen):
+    p=1
+    def passar(self):
+        if self.p<5:
+            self.p+=1
+        self.ids['pag'].source=f'cartas/regras/p{self.p}.jpg'
+    
+    def voltar(self):
+        if self.p>1:
+            self.p-=1
+        self.ids['pag'].source=f'cartas/regras/p{self.p}.jpg'
+
+import os
 class Inicio(Screen):
-    pass
+    def on_enter(self):
+        musica.source=os.path.abspath('musica/menu.ogg')
+        musica.loop=True
+        musica.play()
 
 num_masm, controle= 1, 0
 class Escolha(Screen):
@@ -33,6 +59,11 @@ class Escolha(Screen):
             self.ids[i].background_normal=f'cartas/personagens/{i}.png'
         for i in [2,3,4,5]:
             self.ids[str(i)].background_normal='cartas/personagens/numero.png'
+
+    def on_enter(self):
+        musica.source='musica/menu.ogg'
+        musica.loop=True
+        musica.play()
 
     def troca(self,p):
         self.escolha=p
@@ -52,7 +83,14 @@ class Escolha(Screen):
             gerar_salas()
             gerador_masmorras()
             self.manager.current = 'porta'
+        else:
+            if not self.qjog:
+                self.animate_selec(self.ids['n_qjog'])
+            if not self.escolha:
+                self.animate_selec(self.ids['n_jogs'])
 
+    #caso nenhuma carta seja escolhida
+    animate_selec=lambda self, Widget, *args: (Animation(opacity=1) + Animation(duration=1) + Animation(opacity=0)).start(Widget)
 
 class Porta(Screen):    
     def on_pre_enter(self):
@@ -61,7 +99,9 @@ class Porta(Screen):
         num_masm+=1
 
     def on_enter(self, *args):
-        time.sleep(2)
+        for i in range(10,-1,-1):
+            musica.volume=.1*i
+            time.sleep(.2)
         self.manager.current = 'jogo'
 
 class But_cart(Button):
@@ -82,10 +122,16 @@ class Per_carta(Image):
 class Per_stats(Label):
     pass
 
+class Mapa_pop(Popup):
+    def __init__(self, mapa=[],m='', **kwargs):
+        super().__init__(**kwargs)
+        self.title=f'Masmorra {m+1}'
+        for i in reversed(mapa.children):
+            self.ids['mapa_pop'].add_widget(Image(source=i.source))
+
 class Jogo(Screen):
     global jogs, masmorras
     m,s=0,0
-    ma=['m1','m2','m3','m4','m5']
     esc_cart=''
     t=0
 
@@ -104,15 +150,15 @@ class Jogo(Screen):
         self.ids['mons'].source=masmorras[self.m][self.s].imagem
         masmorras[self.m][self.s].escuro=False
 
-        #mapa da sala
-        for i,ii in enumerate(self.ma):
+        self.ids['mapa_sala'].clear_widgets()
+        for i in range(5):
             if masmorras[self.m][i].escuro:
                 if masmorras[self.m][i].tipo=='Chefe':
-                    self.ids[ii].source='cartas/chefes/chefe.png'
+                    self.ids['mapa_sala'].add_widget(Image(source='cartas/chefes/chefe.png'))
                 else:
-                    self.ids[ii].source='cartas/salas/vazio.jpg'
+                    self.ids['mapa_sala'].add_widget(Image(source='cartas/salas/vazio.jpg'))
             else:
-                self.ids[ii].source=masmorras[self.m][i].imagem
+                self.ids['mapa_sala'].add_widget(Image(source=masmorras[self.m][i].imagem))
             
         #cartas do jogador
         self.cartas_jogador()
@@ -125,6 +171,12 @@ class Jogo(Screen):
             self.esc_cart='0'
             self.t=1
             self.chefe_prox()
+
+    def on_enter(self):
+        while musica.source==(_m:=f"musica/jogo{choice('12345')}.ogg"):pass
+        musica.source=_m
+        musica.volume=1
+        musica.play()
 
     #cartas do jogador
     def cartas_jogador(self):
@@ -145,7 +197,7 @@ class Jogo(Screen):
         self.ids['per_coracao'].clear_widgets()
         self.ids['per_saco'].clear_widgets()
         for i in jogs:
-            self.ids['per_card'].add_widget(Image(source=f'cartas/personagens/{i.nome[:3].lower()}.png',size_hint=[0.15,0.15]))
+            self.ids['per_card'].add_widget(Image(source=f'cartas/personagens/{i.nome[:3].lower()}.png',size_hint=[0.165,0.15]))
             self.ids['per_coracao'].add_widget(But_kokoro(text=str(i.vida)))
             self.ids['per_saco'].add_widget(But_saco(text=str(i.moedas)))
         for i in range(5-len(jogs)):
@@ -287,10 +339,10 @@ class Jogo(Screen):
 
     #animação das cartas jogadas
     def animate_per_carta(self, Widget, *args):
-        per_carta=Animation(opacity=1, padding=[self.width/6.5, self.height/10*1.5, 0, 0])
+        per_carta=Animation(opacity=1, padding=[self.width/6, self.height/10, 0, 0])
         per_carta+=Animation(duration=3)
         per_carta+=Animation(opacity=0)
-        per_carta+=Animation(padding=[self.width/9.8, self.height/10*1.5, 0, 0])
+        per_carta+=Animation(padding=[self.width/9, self.height/10, 0, 0])
         per_carta.start(Widget)
 
     #animação resultado
@@ -302,10 +354,10 @@ class Jogo(Screen):
         result.start(Widget)
 
     def chefe_animate_per_carta(self, Widget, *args):
-        per_carta=Animation(opacity=1, padding=[self.width/4.9, self.height/10*1.5, 0, 0])
+        per_carta=Animation(opacity=1, padding=[self.width/4.7, self.height/10, 0, 0])
         per_carta+=Animation(duration=3)
         per_carta+=Animation(opacity=0)
-        per_carta+=Animation(padding=[self.width/6.5, self.height/10*1.5, 0, 0])
+        per_carta+=Animation(padding=[self.width/6, self.height/10, 0, 0])
         per_carta.start(Widget)
 
     def chefe_prox(self):
@@ -427,7 +479,7 @@ class Fim_de_jogo(Screen):
         self.ids['per_coracao_fim'].clear_widgets()
         self.ids['per_saco_fim'].clear_widgets()
         for i in jogs:
-            self.ids['per_card_fim'].add_widget(Image(source=f'cartas/personagens/{i.nome[:3].lower()}.png',size_hint=[0.15,0.15]))
+            self.ids['per_card_fim'].add_widget(Image(source=f'cartas/personagens/{i.nome[:3].lower()}.png',size_hint=[0.165,0.15]))
             self.ids['per_coracao_fim'].add_widget(But_kokoro(text=str(i.vida)))
             self.ids['per_saco_fim'].add_widget(But_saco(text=str(i.moedas)))
         for i in range(5-len(jogs)):
@@ -485,6 +537,17 @@ class Fim_de_jogo(Screen):
                 self.ids['ganha'].text=f'Jogador {jogs[1].nome} vence a partida'
             else:
                 self.ids['ganha'].text='Empate'
+
+    def on_enter(self):
+        musica.source="musica/fim.ogg"
+        musica.loop=False
+        musica.play()
+
+class Morte(Screen):
+    def on_enter(self):
+        musica.source="musica/perda.ogg"
+        musica.loop=True
+        musica.play()
 
 class DungeonApp(App):
     def build(self):

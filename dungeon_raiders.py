@@ -446,6 +446,4 @@ def gerador_masmorras():
   random.shuffle(salas)
   salas.extend([random.choice(chefes)])
 
-  masmorras.clear()
-  for i in range(0,25,5):
-    masmorras.append(salas[i:i+5])
+  masmorras[:]=[salas[i:i+5] for i in range(0,25,5)]

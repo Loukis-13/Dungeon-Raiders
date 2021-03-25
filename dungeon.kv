@@ -1,5 +1,8 @@
 #:import FadeTransition kivy.uix.screenmanager.FadeTransition
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
+#:import Factory kivy.factory.Factory
+
+#:set bg 'cartas/fundo.jpg'
 
 <Widget>:
     font_name:'Pirata_One/PirataOne-Regular'
@@ -46,70 +49,26 @@
         background_down:'cartas/botao1.png'
         on_press: app.root.current = 'regras'
 
-[Pagina_reg@Screen]:
-    name:ctx.name
-    GridLayout:
-        cols:4
-        border:0
-        swipe_threshold:0
-        canvas:
-            Color:
-                rgba: 0, 0, 0, 1
-            Rectangle:
-                pos: self.pos
-                size: self.size
-        BoxLayout:
-            orientation:'vertical'
-            size_hint:0.2,1
-            Button:
-                text:'voltar'
-                size_hint:1,0.1
-                on_press: app.root.current = 'inicio'
-            Button:
-                text:'<'
-                on_press:
-                    root.manager.transition = SlideTransition(direction="right")
-                    root.manager.current=ctx.pg1
-        Image:
-            source:'cartas/regras/%s.png' % ctx.image1
-        Image:
-            source:'cartas/regras/%s.png' % ctx.image2
-        Button:
-            text:'>'
-            size_hint:0.2,0.1
-            on_press:
-                root.manager.transition = SlideTransition(direction="left")
-                root.manager.current=ctx.pg2
+<Pass_Reg@ButtonBehavior+Label>:
+    size_hint:[0.07,1]
+    font_size:100
 
-<Sm@ScreenManager>:
-    transition: SlideTransition()
-    Pagina_reg:
-        name:'reg1'
-        image1:'1'
-        image2:'2'
-        pg1:'reg1'
-        pg2:'reg2'
-    Pagina_reg:
-        name:'reg2'
-        image1:'3'
-        image2:'4'
-        pg1:'reg1'
-        pg2:'reg3'
-    Pagina_reg:
-        name:'reg3'
-        image1:'5'
-        image2:'6'
-        pg1:'reg2'
-        pg2:'reg4'
-    Pagina_reg:
-        name:'reg4'
-        image1:'7'
-        image2:'8'
-        pg1:'reg3'
-        pg2:'reg4'
-
-<Regras@Screen>:
-    Sm:
+<Regras>:
+    Image:
+        id:pag
+        size:self.size
+        allow_stretch:True
+        pos:self.pos
+        source:'cartas/regras/p1.jpg'
+    Pass_Reg:
+        text:'<'
+        pos_hint: {'x': 0}
+        on_press:root.voltar()
+    Pass_Reg:
+        text:'>'
+        pos_hint: {'x': .93}
+        on_press:root.passar()
+    But_menu:
 
 <Botao_num@Button>:
     font_size:0.2*(self.width+self.height)
@@ -134,7 +93,7 @@
         Rectangle:
             size:self.size
             pos:self.pos
-            source:'cartas/fundo.jpg'
+            source:bg
     But_menu:
 
     BoxLayout:
@@ -147,7 +106,7 @@
             Label:
                 text:'ESCOLHE TEU PERSONAGEM'
                 color:0,0,0,1
-                font_size:.015*(self.parent.width+self.parent.height)
+                font_size:.02*(self.parent.width+self.parent.height)
                 #size_hint_y: 0.2
                 pos: self.parent.pos
                 size: self.parent.size
@@ -194,31 +153,35 @@
         BoxLayout:
             size_hint_y: 0.3
             #spacing:root.width/3
-            padding:20
+            padding:[20,0,20,20]
             BoxLayout:
                 #size_hint_x:0.5
                 orientation: 'vertical'
                 padding:root.width/16, 0, root.width/3, 0   
                 Label:
                     text:'QUANTOS JOGADORES TERÁ A PARTIDA?'
-                    font_size:.03*(self.width+self.height)
+                    font_size:.05*(self.width+self.height)
                 BoxLayout:
                     spacing:root.width/15                          
                     Botao_num:
                         id:2
                         text:'2'
+                        font_size:.25*(self.width+self.height)
                         on_press: root.trocabt(2)
                     Botao_num:
                         id:3
                         text:'3'
+                        font_size:.25*(self.width+self.height)
                         on_press: root.trocabt(3)
                     Botao_num:
                         id:4
                         text:'4'
+                        font_size:.25*(self.width+self.height)
                         on_press: root.trocabt(4)
                     Botao_num:
                         id:5
                         text:'5'
+                        font_size:.25*(self.width+self.height)
                         on_press: root.trocabt(5)
             Button:
                 size_hint:0.25,0.5
@@ -227,25 +190,51 @@
                 background_normal:'cartas/botao1.png'
                 background_down:'cartas/botao1.png'
                 on_press: root.seguir()
+    Label:
+        id:n_qjog
+        text:'Escolhe a quantidade de jogadores'
+        font_size:.03*(self.width+self.height)
+        opacity:0
+        pos_hint:{'y':.2}
+    Label:
+        id:n_jogs
+        text:'Escolhe o teu Personagemm'
+        font_size:.03*(self.width+self.height)
+        opacity:0
+        pos_hint:{'y':.3}
 
 <Porta>:
+    canvas:
+        Rectangle:
+            size:self.size
+            pos:self.pos
+            source:'cartas/salas/porta.jpg'
+    Label:
+        id:porta_text
+        size_hint:1, 0.2
+        font_size:.02*(self.parent.width+self.parent.height)
+        pos_hint:{"center_x":0.5, "center_y":0.93}
+
+#mapa da sala         
+<Mapa_da_sala@ButtonBehavior+BoxLayout>:
+    size_hint:0.28,0.155
+    pos_hint: {'right': 1, 'top': 1}
+    pos:self.pos
+<Mapa_pop>:
+    title_align:'center'
+    title_font:'Pirata_One/PirataOne-Regular'
+    title_size:0.02*(self.width+self.height)
+    separator_height: 0
+    size_hint:[0.7,0.5]
     BoxLayout:
-        orientation: 'vertical' 
-        padding:0,0,root.height/10,root.height/10
-        Label:
-            id:porta_text
-            size_hint:1, 0.2
-            font_size:.015*(self.parent.width+self.parent.height)
-            pos_hint:{"center_x":0.5, "center_y":0.9}
-        Image:
-            source:'cartas/salas/porta1.png'
+        id:mapa_pop
 
 <Jogo>:
     canvas:
         Rectangle:
             size:self.size
             pos:self.pos
-            source:'cartas/fundo.jpg'
+            source:bg
     But_menu:
 
     #conteudo da sala
@@ -257,22 +246,10 @@
     
     #mapa da sala
     RelativeLayout:
-        BoxLayout:
-            size_hint:0.25,0.14
-            pos_hint: {'right': 1, 'top': 1}
-            pos:self.pos
-            Image:
-                id:m1
-            Image:
-                id:m2
-            Image:
-                id:m3
-            Image:
-                id:m4
-            Image:
-                id:m5
+        Mapa_da_sala:
+            id:mapa_sala
+            on_press:Factory.Mapa_pop(self, root.m).open()
 
-       
     BoxLayout:
         id:boxx
         size_hint_y:0.3
@@ -315,38 +292,38 @@
         id:mensagem_monstro_dano
         opacity:0
         orientation:'tb-lr'
-        padding:[self.width/6.5, self.height/10*1.5, 0, 0]
+        padding:[self.width/6.5, self.height/10, 0, 0]
     StackLayout: 
         id:mensagem_chefe_dano
         opacity:0
         orientation:'tb-lr'
-        padding:[self.width/5, self.height/10*1.5, 0, 0]
+        padding:[self.width/4.5, self.height/10, 0, 0]
 
     #cartoes dos personagens
     StackLayout: 
         id:per_card
         orientation:'tb-lr'
-        padding:[0,self.height/10*1.5,0,0]
+        padding:[0,self.height/10,0,0]
     StackLayout: 
         id:per_coracao
         orientation:'tb-lr'
-        padding:[self.width/14.5, self.height/10*1.9, 0, 0]
-        spacing:self.height/11.5
+        padding:[self.width/13, self.height/10*1.4, 0, 0]
+        spacing:self.height/12
     StackLayout: 
         id:per_saco
         orientation:'tb-lr'
-        padding:[self.width/9.8, self.height/10*1.9, 0, 0]
-        spacing:self.height/11.5
+        padding:[self.width/8.5, self.height/10*1.4, 0, 0]
+        spacing:self.height/12
     StackLayout: 
         id:per_carta
         opacity:0
         orientation:'tb-lr'
-        padding:[self.width/9.8, self.height/10*1.5, 0, 0]
+        padding:[self.width/9, self.height/10, 0, 0]
     StackLayout: 
         id:per_carta2
         opacity:0
         orientation:'tb-lr'
-        padding:[self.width/6.5, self.height/10*1.5, 0, 0]
+        padding:[self.width/6, self.height/10, 0, 0]
 
 <But_cart>:
     size_hint: 0.1, 1
@@ -356,16 +333,16 @@
 <But_kokoro>:
     background_normal:'cartas/personagens/coracao.png'
     background_down:'cartas/personagens/coracao.png'
-    size_hint:[0.035,0.09]
+    size_hint:[0.04,0.1]
     border:(0, 0, 0, 0)
-    font_size:0.2*(self.width+self.height)
+    font_size:0.3*(self.width+self.height)
 
 <But_saco>:
     background_normal:'cartas/personagens/saco.png'
     background_down:'cartas/personagens/saco.png'
-    size_hint:[0.035,0.09]
+    size_hint:[0.04,0.1]
     border:(0, 0, 0, 0)
-    font_size:0.2*(self.width+self.height)
+    font_size:0.3*(self.width+self.height)
 
 <Per_stats>:
     font_size:0.15*(self.width+self.height)
@@ -375,12 +352,12 @@
     size_hint:[0.035,0.15]
 
 
-<Morte@Screen>:
+<Morte>:
     canvas:
         Rectangle:
             size:self.size
             pos:self.pos
-            source:'cartas/fundo.jpg'
+            source:bg
     BoxLayout:
         orientation:'vertical'
         size_hint:0.7,0.7
@@ -410,7 +387,7 @@
         Rectangle:
             size:self.size
             pos:self.pos
-            source:'cartas/fundo.jpg'
+            source:bg
     BoxLayout:
         orientation:'vertical'
         size_hint:0.7,0.7
@@ -445,14 +422,14 @@
     StackLayout: 
         id:per_card_fim
         orientation:'tb-lr'
-        padding:[0,self.height/10*1.5,0,0]
+        padding:[0,self.height/10,0,0]
     StackLayout: 
         id:per_coracao_fim
         orientation:'tb-lr'
-        padding:[self.width/14.5, self.height/10*1.9, 0, 0]
-        spacing:self.height/11.5
+        padding:[self.width/13, self.height/10*1.4, 0, 0]
+        spacing:self.height/12
     StackLayout: 
         id:per_saco_fim
         orientation:'tb-lr'
-        padding:[self.width/9.8, self.height/10*1.9, 0, 0]
-        spacing:self.height/11.5
+        padding:[self.width/8.5, self.height/10*1.4, 0, 0]
+        spacing:self.height/12
