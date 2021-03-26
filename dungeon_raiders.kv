@@ -2,7 +2,7 @@
 #:import SlideTransition kivy.uix.screenmanager.SlideTransition
 #:import Factory kivy.factory.Factory
 
-#:set bg 'cartas/fundo.jpg'
+#:set bg 'cartas/b3.jpg'
 
 <Widget>:
     font_name:'Pirata_One/PirataOne-Regular'
@@ -56,8 +56,9 @@
 <Regras>:
     Image:
         id:pag
-        size:self.size
         allow_stretch:True
+        keep_ratio:False
+        size:self.size
         pos:self.pos
         source:'cartas/regras/p1.jpg'
     Pass_Reg:
@@ -101,8 +102,8 @@
         spacing:30
         
         Image:
-            source:'cartas/escolha.png'
-            size_hint_y: 0.3
+            source:'cartas/escolha1.png'
+            size_hint_y: 0.35
             Label:
                 text:'ESCOLHE TEU PERSONAGEM'
                 color:0,0,0,1
@@ -112,7 +113,7 @@
                 size: self.parent.size
 
         BoxLayout:
-            padding:10
+            padding:[10,0]
             spacing:10
             Button:       
                 id:mago    
@@ -160,6 +161,7 @@
                 padding:root.width/16, 0, root.width/3, 0   
                 Label:
                     text:'QUANTOS JOGADORES TERÁ A PARTIDA?'
+                    outline_width:1
                     font_size:.05*(self.width+self.height)
                 BoxLayout:
                     spacing:root.width/15                          

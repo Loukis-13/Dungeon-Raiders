@@ -24,7 +24,8 @@ from dungeon_raiders import *
 for i in listdir("musica"):
     musica=SoundLoader.load(f'musica/{i}')
 musica.loop=True
-Clock.schedule_interval(lambda x: musica.play() if musica.loop else None, 0)
+musicas=[]
+# Clock.schedule_interval(lambda x: musica.play() if musica.loop else None, 0)
 
 class Manager(ScreenManager):
     pass
@@ -32,7 +33,7 @@ class Manager(ScreenManager):
 class Regras(Screen):
     p=1
     def passar(self):
-        if self.p<5:
+        if self.p<6:
             self.p+=1
         self.ids['pag'].source=f'cartas/regras/p{self.p}.jpg'
     
@@ -41,12 +42,12 @@ class Regras(Screen):
             self.p-=1
         self.ids['pag'].source=f'cartas/regras/p{self.p}.jpg'
 
-import os
 class Inicio(Screen):
     def on_enter(self):
-        musica.source=os.path.abspath('musica/menu.ogg')
+        musica.source='musica/menu.ogg'
         musica.loop=True
-        musica.play()
+        if musica.state == "stop" and musica.source == 'musica/menu.ogg':
+            musica.play()
 
 num_masm, controle= 1, 0
 class Escolha(Screen):
@@ -63,7 +64,9 @@ class Escolha(Screen):
     def on_enter(self):
         musica.source='musica/menu.ogg'
         musica.loop=True
-        musica.play()
+        if musica.state == "stop" and musica.source == 'musica/menu.ogg':
+            musica.play()
+        musicas[:]=list('54321')
 
     def troca(self,p):
         self.escolha=p
@@ -173,8 +176,7 @@ class Jogo(Screen):
             self.chefe_prox()
 
     def on_enter(self):
-        while musica.source==(_m:=f"musica/jogo{choice('12345')}.ogg"):pass
-        musica.source=_m
+        musica.source=f"musica/jogo{musicas.pop()}.ogg"
         musica.volume=1
         musica.play()
 
@@ -218,6 +220,12 @@ class Jogo(Screen):
 
     #botao seguir
     def prox(self, *args):
+        if (self.esc_cart and (self.m!=4 or self.s!=4)) or self.t==1:
+            for i in self.ids['cartas'].children:
+                if not i.disabled:
+                    i.background_disabled_normal=i.background_normal
+                i.disabled=True
+
         if self.m!=4 or self.s!=4:
             if self.esc_cart:
                 if self.esc_cart=='tocha':                
@@ -549,9 +557,9 @@ class Morte(Screen):
         musica.loop=True
         musica.play()
 
-class DungeonApp(App):
+class Dungeon_RaidersApp(App):
     def build(self):
         return Manager()
 
 if __name__ == '__main__':
-    DungeonApp().run()
+    Dungeon_RaidersApp().run()
