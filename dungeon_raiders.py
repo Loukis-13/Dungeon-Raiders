@@ -422,17 +422,17 @@ def gerar_salas():
   aboboda00,aboboda01,aboboda02,aboboda10,aboboda11,
   tesouro00,tesouro10,tesouro20,tesouro30,tesouro40,tesouro41,tesouro50,tesouro51,tesouro60,tesouro61]
 
-  matilha_de_lobos=     Chefe('Matilha de Lobos',{2:14,3:14,4:14,5:18},-3,'cartas/chefes/matilha_de_lobos.png',[11,0])
-  megadragao=           Chefe('Megadragão',{2:16,3:16,4:23,5:29},-4,'cartas/chefes/megadragao.png',[5,0])
-  medusa=               Chefe('Medusa',{2:12,3:12,4:14,5:20},-10,'cartas/chefes/medusa.png',[10,0])
-  minotauro=            Chefe('Minotauro',{2:11,3:11,4:15,5:19},-4,'cartas/chefes/minotauro.png',[2,0])
-  coletor_de_impostos=  Chefe('Coletor de impostos',{2:14,3:14,4:18,5:23},-4,'cartas/chefes/coletor_de_impostos.png',[9,0])
-  golem=                Chefe('Golem',{2:14,3:14,4:18,5:23},0,'cartas/chefes/golem.png',[3,8])
-  necromante=           Chefe('Necromante',{2:12,3:12,4:15,5:19},-2,'cartas/chefes/necromante.png',[7,1])
-  vampiro=              Chefe('Vampiro',{2:14,3:14,4:18,5:23},-3,'cartas/chefes/vampiro.png',[4,1])
-  esfinge=              Chefe('Esfinge',{2:14,3:14,4:18,5:23},-4,'cartas/chefes/esfinge.png',[6,0])
-  mumia=                Chefe('Múmia',{2:13,3:13,4:18,5:23},-4,'cartas/chefes/mumia.png',[4,0])
-  hidra=                Chefe('Hídra',{2:8,3:8,4:10,5:13},-2,'cartas/chefes/hidra.png',[12,0])
+  matilha_de_lobos=     Chefe('Matilha de Lobos',{2:14,3:14,4:14,5:18},-3,'cartas/chefes/matilha_de_lobos.jpg',[11,0])
+  megadragao=           Chefe('Megadragão',{2:16,3:16,4:23,5:29},-4,'cartas/chefes/megadragao.jpg',[5,0])
+  medusa=               Chefe('Medusa',{2:12,3:12,4:14,5:20},-10,'cartas/chefes/medusa.jpg',[10,0])
+  minotauro=            Chefe('Minotauro',{2:11,3:11,4:15,5:19},-4,'cartas/chefes/minotauro.jpg',[2,0])
+  coletor_de_impostos=  Chefe('Coletor de impostos',{2:14,3:14,4:18,5:23},-4,'cartas/chefes/coletor_de_impostos.jpg',[9,0])
+  golem=                Chefe('Golem',{2:14,3:14,4:18,5:23},0,'cartas/chefes/golem.jpg',[3,8])
+  necromante=           Chefe('Necromante',{2:12,3:12,4:15,5:19},-2,'cartas/chefes/necromante.jpg',[7,1])
+  vampiro=              Chefe('Vampiro',{2:14,3:14,4:18,5:23},-3,'cartas/chefes/vampiro.jpg',[4,1])
+  esfinge=              Chefe('Esfinge',{2:14,3:14,4:18,5:23},-4,'cartas/chefes/esfinge.jpg',[6,0])
+  mumia=                Chefe('Múmia',{2:13,3:13,4:18,5:23},-4,'cartas/chefes/mumia.jpg',[4,0])
+  hidra=                Chefe('Hídra',{2:8,3:8,4:10,5:13},-2,'cartas/chefes/hidra.jpg',[12,0])
 
   chefes[:]=[matilha_de_lobos, hidra, mumia, vampiro, necromante, coletor_de_impostos, golem, megadragao, medusa, esfinge, minotauro]
 
@@ -446,4 +446,6 @@ def gerador_masmorras():
   random.shuffle(salas)
   salas.extend([random.choice(chefes)])
 
-  masmorras[:]=[salas[i:i+5] for i in range(0,25,5)]
+  masmorras.clear()
+  for i in range(0,25,5):
+    masmorras.append(salas[i:i+5])

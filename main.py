@@ -10,22 +10,15 @@ from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
 from kivy.clock import Clock
 
-# from kivy.config import Config
-# Config.set('graphics', 'resizable', '1')
-# Config.set('graphics', 'width', '1920')
-# Config.set('graphics', 'height', '1080')
-# Config.write()
-
 import time
-from random import choice
 from os import listdir
+from os.path import abspath
 from dungeon_raiders import *
 
 for i in listdir("musica"):
     musica=SoundLoader.load(f'musica/{i}')
 musica.loop=True
 musicas=[]
-# Clock.schedule_interval(lambda x: musica.play() if musica.loop else None, 0)
 
 class Manager(ScreenManager):
     pass
@@ -44,9 +37,9 @@ class Regras(Screen):
 
 class Inicio(Screen):
     def on_enter(self):
-        musica.source='musica/menu.ogg'
+        musica.source=abspath('musica/menu.ogg')
         musica.loop=True
-        if musica.state == "stop" and musica.source == 'musica/menu.ogg':
+        if musica.state == "stop" and musica.source == abspath('musica/menu.ogg'):
             musica.play()
 
 num_masm, controle= 1, 0
@@ -62,9 +55,9 @@ class Escolha(Screen):
             self.ids[str(i)].background_normal='cartas/personagens/numero.png'
 
     def on_enter(self):
-        musica.source='musica/menu.ogg'
+        musica.source=abspath('musica/menu.ogg')
         musica.loop=True
-        if musica.state == "stop" and musica.source == 'musica/menu.ogg':
+        if musica.state == "stop" and musica.source == abspath('musica/menu.ogg'):
             musica.play()
         musicas[:]=list('54321')
 
@@ -157,7 +150,7 @@ class Jogo(Screen):
         for i in range(5):
             if masmorras[self.m][i].escuro:
                 if masmorras[self.m][i].tipo=='Chefe':
-                    self.ids['mapa_sala'].add_widget(Image(source='cartas/chefes/chefe.png'))
+                    self.ids['mapa_sala'].add_widget(Image(source='cartas/chefes/chefe.jpg'))
                 else:
                     self.ids['mapa_sala'].add_widget(Image(source='cartas/salas/vazio.jpg'))
             else:
@@ -176,7 +169,7 @@ class Jogo(Screen):
             self.chefe_prox()
 
     def on_enter(self):
-        musica.source=f"musica/jogo{musicas.pop()}.ogg"
+        musica.source=abspath(f"musica/jogo{musicas.pop()}.ogg")
         musica.volume=1
         musica.play()
 
@@ -225,7 +218,7 @@ class Jogo(Screen):
                 if not i.disabled:
                     i.background_disabled_normal=i.background_normal
                 i.disabled=True
-
+                
         if self.m!=4 or self.s!=4:
             if self.esc_cart:
                 if self.esc_cart=='tocha':                
@@ -508,7 +501,8 @@ class Fim_de_jogo(Screen):
             self.ids['ganha'].text='Venceste'
 
         elif len(jogs)>2:
-            vida=sorted([i.vida for i in jogs])    
+            vida=sorted([i.vida for i in jogs])
+            moeda=sorted([i.moedas for i in jogs if i.vida>0])
             nomes=[]
             if len(set(vida))>1:
                 for i in jogs:
@@ -517,7 +511,6 @@ class Fim_de_jogo(Screen):
                         nomes+=[i.nome]
                 self.ids['morre'].text=f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' morre{m[plural(len(nomes))]}'
 
-                moeda=sorted([i.moedas for i in jogs if i.vida>0])
                 nomes=[]
                 for i in jogs:
                     if i.moedas==moeda[-1] and i.vida>0:
@@ -547,13 +540,13 @@ class Fim_de_jogo(Screen):
                 self.ids['ganha'].text='Empate'
 
     def on_enter(self):
-        musica.source="musica/fim.ogg"
+        musica.source=abspath("musica/fim.ogg")
         musica.loop=False
         musica.play()
 
 class Morte(Screen):
     def on_enter(self):
-        musica.source="musica/perda.ogg"
+        musica.source=abspath("musica/perda.ogg")
         musica.loop=True
         musica.play()
 
