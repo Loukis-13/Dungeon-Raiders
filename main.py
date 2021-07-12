@@ -1,14 +1,11 @@
 from kivy.app import App
-from kivy.uix.widget import Widget
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.animation import Animation
 from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
-from kivy.clock import Clock
 
 import time
 from os import listdir
@@ -45,10 +42,10 @@ class Inicio(Screen):
 num_masm, controle= 1, 0
 class Escolha(Screen):
     escolha=''
-    qjog=0
+    quant_jogs=0
     def on_pre_enter(self):
-        global qjog, num_masm, controle
-        self.escolha, self.qjog, num_masm, controle = '', 0, 1, 0
+        global quant_jogs, num_masm, controle
+        self.escolha, self.quant_jogs, num_masm, controle = '', 0, 1, 0
         for i in ['mago','ladra','cavaleiro','guerreiro','exploradora','aleatorio']:
             self.ids[i].background_normal=f'cartas/personagens/{i}.png'
         for i in [2,3,4,5]:
@@ -68,19 +65,18 @@ class Escolha(Screen):
             else: self.ids[i].background_normal=f'cartas/personagens/{i}.png'
 
     def trocabt(self,b):
-        self.qjog=b
+        self.quant_jogs=b
         for i in [2,3,4,5]:
             if i==b: self.ids[str(i)].background_normal='cartas/personagens/numeroselec.png'
             else: self.ids[str(i)].background_normal='cartas/personagens/numero.png'
 
     def seguir(self):
-        if self.qjog and self.escolha:
-            players(self.qjog, self.escolha)
-            gerar_salas()
+        if self.quant_jogs and self.escolha:
+            players(self.quant_jogs, self.escolha)
             gerador_masmorras()
             self.manager.current = 'porta'
         else:
-            if not self.qjog:
+            if not self.quant_jogs:
                 self.animate_selec(self.ids['n_qjog'])
             if not self.escolha:
                 self.animate_selec(self.ids['n_jogs'])
@@ -468,11 +464,9 @@ class Jogo(Screen):
                 i.redefinir()
             self.manager.current = 'porta'
 
-plural=lambda n: 0 if n==1 else 1
-s  = ["","s"]
-es = ["","es"]
-m  = ["","m"]
-ser= ["é","são"]
+plural = lambda n: 0 if n==1 else 1
+es = ["", "es"]
+m  = ["", "m"]
 
 class Fim_de_jogo(Screen):
     def jogs_info(self):
@@ -480,7 +474,7 @@ class Fim_de_jogo(Screen):
         self.ids['per_coracao_fim'].clear_widgets()
         self.ids['per_saco_fim'].clear_widgets()
         for i in jogs:
-            self.ids['per_card_fim'].add_widget(Image(source=f'cartas/personagens/{i.nome[:3].lower()}.png',size_hint=[0.165,0.15]))
+            self.ids['per_card_fim'].add_widget(Image(source=f'cartas/personagens/{i.nome[:3].lower()}.png', size_hint=[0.165, 0.15]))
             self.ids['per_coracao_fim'].add_widget(But_kokoro(text=str(i.vida)))
             self.ids['per_saco_fim'].add_widget(But_saco(text=str(i.moedas)))
         for i in range(5-len(jogs)):
@@ -489,70 +483,74 @@ class Fim_de_jogo(Screen):
 
     def on_pre_enter(self):
         global jogs
-        global m , es
-        self.ids['morre'].text=''
-        self.ids['ganha'].text=''
+
+        self.ids['morre'].text = ''
+        self.ids['ganha'].text = ''
         self.jogs_info()
 
-        jogs[:]=[i for i in jogs if i.vida>0]
-        
-        if len(jogs)==1:
-            self.ids['morre'].text='Todos estão mortos, exceto tu'
-            self.ids['ganha'].text='Venceste'
+        jogs[:] = [i for i in jogs if i.vida > 0]
 
-        elif len(jogs)>2:
-            vida=sorted([i.vida for i in jogs])
-            moeda=sorted([i.moedas for i in jogs if i.vida>0])
-            nomes=[]
-            if len(set(vida))>1:
-                for i in jogs:
-                    if i.vida==vida[0]:
-                        i.vida-=10
-                        nomes+=[i.nome]
-                self.ids['morre'].text=f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' morre{m[plural(len(nomes))]}'
+        if len(jogs) == 1:
+            self.ids['morre'].text = 'Todos estão mortos, exceto tu'
+            self.ids['ganha'].text = 'Venceste'
 
-                nomes=[]
-                for i in jogs:
-                    if i.moedas==moeda[-1] and i.vida>0:
-                        nomes+=[i.nome]
-                self.ids['ganha'].text=f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' vence{m[plural(len(nomes))]} a partida'
+        elif len(jogs) > 2:
+            vida = sorted([i.vida for i in jogs])
+            moeda = sorted([i.moedas for i in jogs if i.vida > 0])
+            nomes = []
 
-            elif len(set(vida))==1 and len(set(moeda))>1:
-                self.ids['morre'].text='Ninguém morre'
-                for i in jogs:
-                    if i.moedas==moeda[-1]:
-                        nomes+=[i.nome]
-                self.ids['ganha'].text=f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' vence{m[plural(len(nomes))]} a partida'
+            if len(set(vida)) > 1:
+                for jog in jogs:
+                    if jog.vida == vida[0]:
+                        jog.vida -= 10
+                        nomes.append(jog.nome)
+                self.ids['morre'].text = f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' morre{m[plural(len(nomes))]}'
 
-            elif len(set(vida))==1 and len(set(moeda))==1:
-                self.ids['ganha'].text='Empate'
+                nomes.clear()
+                for jog in jogs:
+                    if jog.moedas == moeda[-1] and jog.vida > 0:
+                        nomes.append(jog.nome)
+                self.ids['ganha'].text = f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' vence{m[plural(len(nomes))]} a partida'
+
+            elif len(set(vida)) == 1 and len(set(moeda)) > 1:
+                self.ids['morre'].text = 'Ninguém morre'
+                for jog in jogs:
+                    if jog.moedas == moeda[-1]:
+                        nomes.append(jog.nome)
+                self.ids['ganha'].text = f'Jogador{es[plural(len(nomes))]} '+', '.join(nomes)+f' vence{m[plural(len(nomes))]} a partida'
+
+            elif len(set(vida)) == 1 and len(set(moeda)) == 1:
+                self.ids['ganha'].text = 'Empate'
 
         else:
-            if jogs[0].moedas>jogs[1].moedas:
-                self.ids['ganha'].text=f'Jogador {jogs[0].nome} vence a partida'
-            elif jogs[1].moedas>jogs[0].moedas:
-                self.ids['ganha'].text=f'Jogador {jogs[1].nome} vence a partida'
-            elif jogs[0].vida>jogs[1].vida:
-                self.ids['ganha'].text=f'Jogador {jogs[0].nome} vence a partida'
-            elif jogs[1].vida>jogs[0].vida:
-                self.ids['ganha'].text=f'Jogador {jogs[1].nome} vence a partida'
+            if jogs[0].moedas > jogs[1].moedas:
+                self.ids['ganha'].text = f'Jogador {jogs[0].nome} vence a partida'
+            elif jogs[1].moedas > jogs[0].moedas:
+                self.ids['ganha'].text = f'Jogador {jogs[1].nome} vence a partida'
+            elif jogs[0].vida > jogs[1].vida:
+                self.ids['ganha'].text = f'Jogador {jogs[0].nome} vence a partida'
+            elif jogs[1].vida > jogs[0].vida:
+                self.ids['ganha'].text = f'Jogador {jogs[1].nome} vence a partida'
             else:
-                self.ids['ganha'].text='Empate'
+                self.ids['ganha'].text = 'Empate'
 
     def on_enter(self):
-        musica.source=abspath("musica/fim.ogg")
-        musica.loop=False
+        musica.source = abspath("musica/fim.ogg")
+        musica.loop = False
         musica.play()
+
 
 class Morte(Screen):
     def on_enter(self):
-        musica.source=abspath("musica/perda.ogg")
-        musica.loop=True
+        musica.source = abspath("musica/perda.ogg")
+        musica.loop = True
         musica.play()
+
 
 class Dungeon_RaidersApp(App):
     def build(self):
         return Manager()
+
 
 if __name__ == '__main__':
     Dungeon_RaidersApp().run()
