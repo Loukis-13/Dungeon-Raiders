@@ -341,7 +341,9 @@ class Jogo(Screen):
 
     """ Bola de cristal """
 
-    animate_bola= lambda self, Widget, *args: Animation(opacity=1, padding=[self.width/6.5, self.height/10*1.5, 0, 0]).start(Widget)
+    def animate_bola(self, Widget, *args):
+        Animation(opacity=1, padding=[self.width/6, self.height/10, 0, 0]).start(Widget)
+
     def boladecristal(self):
         jogs[0].ultima = self.ecolha_carta
         jogs[0].cartas.remove(self.ecolha_carta)
@@ -359,7 +361,9 @@ class Jogo(Screen):
         self.ids['bt_seguir'].unbind(on_press=self.prox)
         self.ids['bt_seguir'].bind(on_press=self.boladecristal_pt2)
 
-    animate_bola_pt2= lambda self, Widget, *args: (Animation(duration=4)+Animation(opacity=0)+Animation(padding=[self.width/9.8, self.height/10*1.5, 0, 0])).start(Widget)
+    def animate_bola_pt2(self, Widget, *args):
+        (Animation(duration=4)+Animation(opacity=0)+Animation(padding=[self.width/9, self.height/10, 0, 0])).start(Widget)
+
     def boladecristal_pt2(self, *args):
         if self.ecolha_carta:
             if self.ecolha_carta == 'boladecristal':
@@ -375,17 +379,17 @@ class Jogo(Screen):
 
             self.animate_bola_pt2(self.ids['per_carta'])
 
-            x = masmorras[self.masmorra][self.sala].resolver()
-            self.ids['mensagem_monstro'].text = x[0]
+            resultado = masmorras[self.masmorra][self.sala].resolver()
+            self.ids['mensagem_monstro'].text = resultado[0]
 
             self.ids['mensagem_monstro_dano'].clear_widgets()
-            for i in x[1]:
+            for i in resultado[1]:
                 if i[0] not in ['espada', 'chave', 'tocha', 'boladecristal']:
                     self.ids['mensagem_monstro_dano'].add_widget(ResultadoSala(text=i[0], color=i[1]))
                 else:
-                    self.ids['mensagem_monstro_dano'].add_widget(CartaJogada(source=f'cartas/cartas_de_ataque/{i[0]}.png', size_hint=[0.15, 0.10]))
+                    self.ids['mensagem_monstro_dano'].add_widget(CartaJogada(source=f'cartas/cartas_de_ataque/{i[0]}.png', size_hint=[0.15, 0.15]))
 
-            if x[2]:
+            if resultado[2]:
                 self.animate_monstro_morte(self.ids['imagem_conteudo_sala'])
 
             self.animate_stats_per(self.ids['mensagem_monstro_dano'])
@@ -467,7 +471,7 @@ class Jogo(Screen):
 
     """ Animações """
 
-    # mostrar resultado ao lado do cartão do personagem
+    # mostrar mensagem de resolução da sala
     def animate_stats_per(self, Widget, *args):
         (Animation(opacity=1) + Animation(duration=3) + Animation(opacity=0)).start(Widget)
 
@@ -477,9 +481,7 @@ class Jogo(Screen):
 
     # caso nenhuma carta seja escolhida
     def animate_selec(self, Widget, *args):         
-        no_selec=Animation(opacity=1)
-        no_selec+=Animation(opacity=0)
-        no_selec.start(Widget)
+        (Animation(opacity=1) + Animation(opacity=0)).start(Widget)
 
     # animação das cartas jogadas
     def animate_per_carta(self, Widget, *args):
