@@ -304,11 +304,10 @@ class Chefe():
 		if 6 in self.hab:
 			CHEFE_DICT_CARTAS['boladecristal'] = 5
 
-		val_cartas = sorted([sum(CHEFE_DICT_CARTAS[i]
-								 for i in j.ultima) for j in jogs])
+		val_cartas = sorted([sum(CHEFE_DICT_CARTAS[i] for i in j.ultima) for j in jogs])
 
 		if 8 in self.hab:
-			self.dano = -val_cartas[-1] if val_cartas[-1] < 5 else -5
+			self.dano = -min(val_cartas[-1], 5)
 
 		if sum(val_cartas) >= self.vida[len(jogs)]:
 			morto = True
@@ -358,7 +357,7 @@ class Chefe():
 
 
 jogs = []
-def players(quant_jogs, escolha):
+def gerar_jogadores(quant_jogs, escolha):
 	guerreiro = Personagem('Guerreiro', 10, 2, 'cartas/personagens/guerreiro.png', ['1', '2', '3', '4', '5'])
 	mago = Personagem('Mago', 9, 1, 'cartas/personagens/mago.png', ['1', '2', '3', '4', '5', 'boladecristal', 'boladecristal'])
 	cavaleiro = Personagem('Cavaleiro', 9, 1, 'cartas/personagens/cavaleiro.png', ['1', '2', '3', '4', '5', 'espada'])
@@ -375,7 +374,7 @@ def players(quant_jogs, escolha):
 
 
 masmorras = []
-def gerador_masmorras():
+def gerar_masmorra():
 	# gerar salas
 	aboboda00 = Aboboda('tocha', 'boladecristal', 'chave', 'espada', {'vida': 1}, 'cartas/salas/aboboda0.png')  # 3
 	aboboda01 = copy.deepcopy(aboboda00)

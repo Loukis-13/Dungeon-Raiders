@@ -48,6 +48,14 @@
         background_normal:'cartas/botao1.png'
         background_down:'cartas/botao1.png'
         on_press: app.root.current = 'regras'
+    Button:
+        text:'Sair'
+        size_hint:.15, .10
+        border:(0, 0, 0, 0)
+        pos_hint:{"center_x":0.1, "center_y":0.1}
+        background_normal:'cartas/botao1.png'
+        background_down:'cartas/botao1.png'
+        on_press:app.stop()
 
 <Pass_Reg@ButtonBehavior+Label>:
     size_hint:[0.07,1]
@@ -222,7 +230,7 @@
     size_hint:0.28,0.155
     pos_hint: {'right': 1, 'top': 1}
     pos:self.pos
-<Mapa_pop>:
+<MapaPopup>:
     title_align:'center'
     title_font:'Pirata_One/PirataOne-Regular'
     title_size:0.02*(self.width+self.height)
@@ -241,7 +249,7 @@
 
     #conteudo da sala
     Image:
-        id:mons 
+        id:imagem_conteudo_sala 
         size_hint:0.5, 0.5
         pos_hint:{"center_x":0.5, "center_y":0.6}
         source:
@@ -250,7 +258,7 @@
     RelativeLayout:
         Mapa_da_sala:
             id:mapa_sala
-            on_press:Factory.Mapa_pop(self, root.m).open()
+            on_press:Factory.MapaPopup(self, root.m).open()
 
     BoxLayout:
         id:boxx
@@ -327,31 +335,31 @@
         orientation:'tb-lr'
         padding:[self.width/6, self.height/10, 0, 0]
 
-<But_cart>:
+<CartasDoJogador>:
     size_hint: 0.1, 1
     on_press:self.parent.parent.parent.cart_selec(self.id)
     border:(0, 0, 0, 0)
 
-<But_kokoro>:
+<VidaJogador>:
     background_normal:'cartas/personagens/coracao.png'
     background_down:'cartas/personagens/coracao.png'
     size_hint:[0.04,0.1]
     border:(0, 0, 0, 0)
     font_size:0.3*(self.width+self.height)
 
-<But_saco>:
+<DinheiroJogador>:
     background_normal:'cartas/personagens/saco.png'
     background_down:'cartas/personagens/saco.png'
     size_hint:[0.04,0.1]
     border:(0, 0, 0, 0)
     font_size:0.3*(self.width+self.height)
 
-<Per_stats>:
+<CartaJogada>:
+    size_hint:[0.035,0.15]
+
+<ResultadoSala>:
     font_size:0.15*(self.width+self.height)
     size_hint:[0.15,0.15]
-
-<Per_carta>:
-    size_hint:[0.035,0.15]
 
 
 <Morte>:
@@ -415,12 +423,12 @@
                 background_down:'cartas/botao1.png'
                 on_press:app.root.current='escolha'
             Button:
-                text:'sair'
+                text:'Início'
                 font_size:0.04*(self.width+self.height)
                 border:(0, 0, 0, 0)
                 background_normal:'cartas/botao1.png'
                 background_down:'cartas/botao1.png'
-                on_press:app.stop()
+                on_press:app.root.current='inicio'
     StackLayout: 
         id:per_card_fim
         orientation:'tb-lr'
